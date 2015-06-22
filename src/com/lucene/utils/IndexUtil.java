@@ -79,7 +79,10 @@ public class IndexUtil {
 				 reader = DirectoryReader.open(directory);
 			 } else {
 				 IndexReader tr = DirectoryReader.openIfChanged((DirectoryReader) reader);
-				 if (tr != null) reader = tr;
+				 if (tr != null) {
+					 reader.close();
+					 reader = tr;
+				 }
 			 }
 			 return new IndexSearcher(reader);
 		} catch (IOException e) {
@@ -179,12 +182,12 @@ public class IndexUtil {
 		} catch (IOException e) {
 			 e.printStackTrace();
 		} finally {
-//			if (writer != null)
-//				try {
-//					writer.close();
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
+			if (writer != null)
+				try {
+					writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 	 }
 	 
