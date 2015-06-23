@@ -117,10 +117,14 @@ import com.lucene.utils.SearcherUtil;
 	 
 	 @Test
 	 public void testSearchPage01() {
-		 su.searchByPage("java", 2, 5);
+		 su.searchByPage("java", 3, 5);
 		 System.out.println("---------------------");
 		 su.searchNoPage("java");
 	 }
+	 
+	 @Test
+	 public void testSearchPage02() {
+		 su.searchBySearchAfter("java", 3, 5);
+	 }
 }
-
  

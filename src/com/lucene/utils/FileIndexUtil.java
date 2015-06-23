@@ -65,5 +65,4 @@ import org.apache.lucene.store.FSDirectory;
 		}
 	 }
 }
-
  

@@ -271,6 +271,43 @@ public class SearcherUtil {
 			 e.printStackTrace();
 		}
 	 }
+	 
+	 /*
+	  * 根据页码和分页大小获取上一页的最后一个ScoreDoc
+	  */
+	 public ScoreDoc lastScoreDoc(int pageIndex, int pageSize, Query query, IndexSearcher searcher) {
+		 try {
+			if (pageIndex == 1) return null;	//如果是第一页，返回null
+			int queryNum = (pageIndex - 1) * pageSize;	//获取上一页的数量
+			TopDocs tds = searcher.search(query, queryNum);
+			System.out.println("一共查询了："+tds.totalHits+"条（"+ queryNum +"）");
+			ScoreDoc[] sds = tds.scoreDocs;
+			return sds[queryNum -1];
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}
+		 return null;
+	 }
+	 
+	 public void searchBySearchAfter(String queryStr, int pageIndex, int pageSize) {
+		 Directory directory = FileIndexUtil.getDirectory();
+		 IndexSearcher searcher = getSearcher(directory);
+		 QueryParser parser = new QueryParser("content", new StandardAnalyzer());
+		 try {
+			Query query = parser.parse(queryStr);
+			//先获取上一页的最后一个
+			ScoreDoc lastSd = lastScoreDoc(pageIndex, pageSize, query, searcher);
+			//再根据上一页的最后一个，使用searchAfter
+			TopDocs tds = searcher.searchAfter(lastSd, query, pageSize);
+			for (ScoreDoc sd : tds.scoreDocs) {
+				Document doc = searcher.doc(sd.doc);
+				System.out.println("["+sd.doc+"]"+doc.get("filePath") + "--->" + doc.get("fileName"));
+			}
+		} catch (ParseException e) {
+			 e.printStackTrace();
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}
+	 }
 }
-
  
