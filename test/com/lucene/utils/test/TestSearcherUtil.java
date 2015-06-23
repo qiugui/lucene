@@ -1,5 +1,10 @@
  package com.lucene.utils.test;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -7,6 +12,7 @@ import org.apache.lucene.search.Query;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.lucene.utils.FileIndexUtil;
 import com.lucene.utils.SearcherUtil;
 
  public class TestSearcherUtil {
@@ -16,6 +22,17 @@ import com.lucene.utils.SearcherUtil;
 	 @Before
 	 public void init() {
 		 su = new SearcherUtil();
+	 }
+	 
+	 @Test
+	 public void copyFile() throws IOException {
+		 String path = "D:\\lucene\\example";
+		 File file = new File(path);
+		 for (File f : file.listFiles()) {
+			 String desFileName = FilenameUtils.getFullPath(f.getAbsolutePath()) +
+					 FilenameUtils.getBaseName(f.getName()) + ".hi";
+			 FileUtils.copyFile(f, new File(desFileName));
+		 }
 	 }
 	 
 	 @Test
@@ -91,6 +108,18 @@ import com.lucene.utils.SearcherUtil;
 		 //完全匹配，且I 和 football中间有一个单词，类似模糊查询
 //		 Query query = parser.parse("\"I football\"~1");
 		 su.searchByQueryParser(query, 10);
+	 }
+	 
+	 @Test
+	 public void indexFile() {
+		 FileIndexUtil.index(true);
+	 }
+	 
+	 @Test
+	 public void testSearchPage01() {
+		 su.searchByPage("java", 2, 5);
+		 System.out.println("---------------------");
+		 su.searchNoPage("java");
 	 }
 }
 

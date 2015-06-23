@@ -17,6 +17,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
@@ -125,6 +127,24 @@ public class SearcherUtil {
 		 return null;
 	 }
 	 
+	 public IndexSearcher getSearcher(Directory directory) {
+		 try {
+			 if (reader == null) {
+				 reader = DirectoryReader.open(directory);
+			 } else {
+				 IndexReader tr = DirectoryReader.openIfChanged((DirectoryReader) reader);
+				 if (tr != null) {
+					 reader.close();
+					 reader = tr;
+				 }
+			 }
+			 return new IndexSearcher(reader);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		 return null;
+	 }
+	 
 	 //精确查询
 	 public void searchByTerm(String field, String value, int num) {
 		Query query = new TermQuery(new Term(field, value));
@@ -185,10 +205,11 @@ public class SearcherUtil {
 		 queryResult(query, num);
 	 }
 	 
-	 //
+	 //几乎覆盖所有的Query
 	 public void searchByQueryParser(Query query, int num) {
 		 queryResult(query, num);
 	 }
+	 
 	private void queryResult(Query query, int num) {
 		Calendar c = Calendar.getInstance();
 		try {
@@ -208,6 +229,48 @@ public class SearcherUtil {
 		}
 	}
 
+	 public void searchByPage(String queryStr, int pageIndex, int pageSize) {
+		 Directory directory = FileIndexUtil.getDirectory();
+		 IndexSearcher searcher = getSearcher(directory);
+		 QueryParser parser = new QueryParser("content", new StandardAnalyzer());
+		 try {
+			Query query = parser.parse(queryStr);
+			TopDocs tds = searcher.search(query, 200);
+			System.out.println("一共查询了："+tds.totalHits+"条");
+			ScoreDoc[] sds = tds.scoreDocs;
+			int start = (pageIndex - 1) * pageSize;
+			int end = pageIndex * pageSize;
+			for (int i = start; i < end; i++) {
+				Document doc = searcher.doc(sds[i].doc);
+				System.out.println("["+sds[i].doc+"]"+doc.get("filePath") + "--->" + doc.get("fileName"));
+			}
+		} catch (ParseException e) {
+			 e.printStackTrace();
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}
+	 }
+	 
+	 public void searchNoPage(String queryStr) {
+		 Directory directory = FileIndexUtil.getDirectory();
+		 IndexSearcher searcher = getSearcher(directory);
+		 QueryParser parser = new QueryParser("content", new StandardAnalyzer());
+		 try {
+			Query query = parser.parse(queryStr);
+			TopDocs tds = searcher.search(query, 200);
+			System.out.println("一共查询了："+tds.totalHits+"条");
+			ScoreDoc[] sds = tds.scoreDocs;
+			
+			for (int i = 0; i < sds.length; i++) {
+				Document doc = searcher.doc(sds[i].doc);
+				System.out.println("["+sds[i].doc+"]"+doc.get("filePath") + "--->" + doc.get("fileName"));
+			}
+		} catch (ParseException e) {
+			 e.printStackTrace();
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}
+	 }
 }
 
  
