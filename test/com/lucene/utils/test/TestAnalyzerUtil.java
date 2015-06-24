@@ -78,7 +78,7 @@ import com.lucene.utils.AnalyzerUtil;
 		 
 		 String text = "我来自中国安徽宿州埇桥区";
 		 
-		 AnalyzerUtil.displayToken(text, a1);
+		 AnalyzerUtil.displayAllTokenInfo(text, a1);
 	 }
 }
 
