@@ -1,15 +1,31 @@
  package com.lucene.utils.test;
 
+import java.io.IOException;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.junit.Test;
 
 import com.lucene.myAnalyzer.QgSimilarAnalyzer;
 import com.lucene.myAnalyzer.QgStopAnalyzer;
+import com.lucene.myAnalyzer.SimpleSimilarWords;
 import com.lucene.utils.AnalyzerUtil;
  public class TestAnalyzerUtil {
 
@@ -73,12 +89,23 @@ import com.lucene.utils.AnalyzerUtil;
 	 }
 	 
 	 @Test
-	 public void test05() {
-		 Analyzer a1 = new QgSimilarAnalyzer();
+	 public void test05() throws IOException {
+		 //同义词分词器
+		 Analyzer a1 = new QgSimilarAnalyzer(new SimpleSimilarWords());
 		 
 		 String text = "我来自中国安徽宿州埇桥区";
-		 
-		 AnalyzerUtil.displayAllTokenInfo(text, a1);
+		 Directory directory = new RAMDirectory();
+		 IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(a1));
+		 Document doc = new Document();
+		 doc.add(new TextField("content", text, Store.YES));
+		 writer.addDocument(doc);
+		 writer.close();
+		 IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(directory));
+		 Query query = new TermQuery(new Term("content", "俺"));
+		 TopDocs tds = searcher.search(query, 10);
+		 Document result = searcher.doc(tds.scoreDocs[0].doc);
+		 System.out.println(result.get("content"));
+//		 AnalyzerUtil.displayAllTokenInfo(text, a1);
 	 }
 }
 

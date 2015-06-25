@@ -1,8 +1,6 @@
  package com.lucene.myAnalyzer;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 import org.apache.lucene.analysis.TokenFilter;
@@ -11,16 +9,25 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
 import org.apache.lucene.util.AttributeSource;
 
- public class QgSimilarFilter extends TokenFilter {
+ /** 
+* @ClassName: QgSimilarFilter 
+* @Description: 同义词过滤器
+* @author qiugui 
+* @date 2015年6月25日 上午10:34:50 
+*  
+*/ 
+public class QgSimilarFilter extends TokenFilter {
 
 	 private final CharTermAttribute cta = this.addAttribute(CharTermAttribute.class);
 	 private final PositionIncrementAttribute pia = this.addAttribute(PositionIncrementAttribute.class);
 	 private AttributeSource.State current;
 	 
+	 private SimilarWordsEngine similarWordsEngine;
 	 private Stack<String> similarWords = new Stack<String>();
 	 
-	protected QgSimilarFilter(TokenStream input) {
+	protected QgSimilarFilter(TokenStream input,SimilarWordsEngine similarWordsEngine) {
 		super(input);
+		this.similarWordsEngine = similarWordsEngine;
 	}
 
 	@Override
@@ -44,10 +51,8 @@ import org.apache.lucene.util.AttributeSource;
 	}
 
 	private boolean hasSimilarWords(String name) {
-		Map<String, String[]> maps = new HashMap<String, String[]>();
-		maps.put("中国", new String[]{"天朝","大陆"});
-		maps.put("我", new String[]{"俺","咱"});
-		String[] sWords = maps.get(name);
+		
+		String[] sWords = similarWordsEngine.getSimilarWords(name);
 		if (null != sWords) {
 			for(String str:sWords){
 				similarWords.push(str);
