@@ -12,6 +12,13 @@ import org.apache.lucene.analysis.core.StopAnalyzer;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
+
+import com.chenlb.mmseg4j.Chunk;
+import com.chenlb.mmseg4j.Dictionary;
+import com.chenlb.mmseg4j.Seg;
+import com.chenlb.mmseg4j.Sentence;
+import com.chenlb.mmseg4j.SimpleSeg;
+import com.chenlb.mmseg4j.analysis.MMSegTokenizer;
  /** 
 * @ClassName: QgSimilarAnalyzer 
 * @Description: 自定义同义词分词器 
@@ -54,13 +61,15 @@ public class QgSimilarAnalyzer extends Analyzer {
 	protected TokenStreamComponents createComponents(String fieldName) {
 		final Tokenizer tokenizer;
 		TokenStream result;
-		if (getVersion().onOrAfter(Version.LUCENE_4_8_0)){
-			tokenizer = new HMMChineseTokenizer();
-			result = tokenizer;
-		} else {
-			tokenizer = new SentenceTokenizer();
-			result = new WordTokenFilter(tokenizer);
-		}
+//		if (getVersion().onOrAfter(Version.LUCENE_4_8_0)){
+//			tokenizer = new HMMChineseTokenizer();
+//			result = tokenizer;
+//		} else {
+//			tokenizer = new SentenceTokenizer();
+//			result = new WordTokenFilter(tokenizer);
+//		}
+		tokenizer = new MMSegTokenizer(new SimpleSeg(Dictionary.getInstance("D:\\软件\\lucene-5.2.0-jar\\data")));
+		result = tokenizer;
 		if (!stopWords.isEmpty()) result = new StopFilter(result, (CharArraySet) stopWords);
 		result = new QgSimilarFilter(result,similarWordsEngine);
 		return new TokenStreamComponents(tokenizer, result);

@@ -16,6 +16,7 @@ public class SimpleSimilarWords implements SimilarWordsEngine {
 	@Override
 	public String[] getSimilarWords(String str) {
 		maps.put("中国", new String[]{"天朝","大陆"});
+		maps.put("埇桥区", new String[]{"埇桥"});
 		maps.put("我", new String[]{"俺","咱"});
 		String[] sWords = maps.get(str);
 		return sWords;
