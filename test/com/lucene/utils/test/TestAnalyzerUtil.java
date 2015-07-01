@@ -94,7 +94,7 @@ import com.lucene.utils.AnalyzerUtil;
 	 @Test
 	 public void test05() throws IOException {
 		 //同义词分词器
-		 Analyzer a1 = new QgSimilarAnalyzer(new SimpleSimilarWords());
+		 Analyzer a1 = new QgSimilarAnalyzer(new ComplexSimilarWords());
 //		 Analyzer a2 = new MMSegAnalyzer("D:\\软件\\lucene-5.2.0-jar\\data");
 //		 Analyzer a3 = new ComplexAnalyzer("D:\\软件\\lucene-5.2.0-jar\\data");
 		 String text = "我来自中国安徽宿州埇桥区";
@@ -105,7 +105,7 @@ import com.lucene.utils.AnalyzerUtil;
 		 writer.addDocument(doc);
 		 writer.close();
 		 IndexSearcher searcher = new IndexSearcher(DirectoryReader.open(directory));
-		 Query query = new TermQuery(new Term("content", "埇桥"));
+		 Query query = new TermQuery(new Term("content", "皖"));
 		 TopDocs tds = searcher.search(query, 10);
 		 Document result = searcher.doc(tds.scoreDocs[0].doc);
 		 System.out.println(result.get("content"));
