@@ -8,6 +8,8 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -18,7 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.lucene.utils.FileIndexUtil;
-import com.sun.org.apache.xml.internal.security.Init;
  public class TestSearch {
 
 	 private static IndexReader reader = null;
@@ -64,9 +65,9 @@ import com.sun.org.apache.xml.internal.security.Init;
 			for (ScoreDoc sd : tds.scoreDocs) {
 				Document doc = searcher.doc(sd.doc);
 				System.out.println(sd.doc + ":(" + 
-						sd.score + ")[" + doc.get("fileName") +
-						"]【" + doc.get("filePath") +
-						"】" + doc.get("size")+"【" + doc.get("sortSize") +
+						sd.score + ") [" + doc.get("fileName") +
+						"] 【" + doc.get("filePath") +
+						"】Size--->" + doc.get("size")+" 【" + doc.get("date") +
 						"】");
 			}
 			
@@ -78,16 +79,6 @@ import com.sun.org.apache.xml.internal.security.Init;
 	 }
 	 
 	 TestSearch ts;
-	 
-	 @Before
-	 public void init() {
-		 ts = new TestSearch();
-	 }
-	 
-	 @Test
-	 public void index() {
-		 FileIndexUtil.index(true);
-	 }
 	 
 	 @Test
 	 public void test01(){
@@ -106,7 +97,49 @@ import com.sun.org.apache.xml.internal.security.Init;
 		  *	dfDocument.add(new NumericDocValuesField("sortid",Long.parseLong(id)));  
 		  *	查询的时候，使用new Sort(new SortField("sortid", SortField.Type.LONG, true));作为排序。
 		  */
+//		 ts.search("java", new Sort(new SortField("sortFileName", SortField.Type.STRING)));
+//		 ts.search("java", new Sort(new SortField("sortSize", SortField.Type.LONG)));
+//		 ts.search("java", new Sort(new SortField("date", SortField.Type.LONG)));
 		 ts.search("java", new Sort(new SortField("sortSize", SortField.Type.LONG)));
+	 }
+	 
+	 @Before
+	 public void init() {
+		 ts = new TestSearch();
+	 }
+	 
+	 @Test
+	 public void index() {
+		 FileIndexUtil.index(true);
+	 }
+	 
+	 public void searchFilter(String qStr, Filter filter) {
+		 try {
+			IndexSearcher searcher = getSearcher();
+			QueryParser parser = new QueryParser("content", new StandardAnalyzer());
+			Query query = parser.parse(qStr);
+			BooleanQuery
+			TopDocs tds = null;
+			if (null != filter) {
+				tds = searcher.search(query, filter, 50);
+			} else {
+				tds = searcher.search(query, 50);
+			}
+			
+			for (ScoreDoc sd : tds.scoreDocs) {
+				Document doc = searcher.doc(sd.doc);
+				System.out.println(sd.doc + ":(" + 
+						sd.score + ") [" + doc.get("fileName") +
+						"] 【" + doc.get("filePath") +
+						"】Size--->" + doc.get("size")+" 【" + doc.get("date") +
+						"】");
+			}
+				
+		} catch (ParseException e) {
+			 e.printStackTrace();
+		} catch (IOException e) {
+			 e.printStackTrace();
+		}
 	 }
 }
 

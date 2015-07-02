@@ -11,15 +11,14 @@ import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.NumericDocValuesField;
-import org.apache.lucene.document.SortedNumericDocValuesField;
+import org.apache.lucene.document.SortedDocValuesField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexableField;
-import org.apache.lucene.search.SortField.Type;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
  public class FileIndexUtil {
 
 	 private static Directory directory = null;
@@ -51,9 +50,15 @@ import org.apache.lucene.store.FSDirectory;
 			for (File f : file.listFiles()) {
 				doc = new Document();
 				doc.add(new TextField("content", new FileReader(f)));
+				
+				doc.add(new SortedDocValuesField("sortFileName", new BytesRef(f.getName())));
 				doc.add(new StringField("fileName", f.getName(), Store.YES));
+				
 				doc.add(new StringField("filePath", f.getAbsolutePath(), Store.YES));
+				
+				doc.add(new NumericDocValuesField("date", f.lastModified()));
 				doc.add(new LongField("date", f.lastModified(), Store.YES));
+				
 				doc.add(new NumericDocValuesField("sortSize", f.length()));
 				doc.add(new IntField("size", (int)f.length(), Store.YES));
 				writer.addDocument(doc);
