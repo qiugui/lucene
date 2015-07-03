@@ -6,16 +6,22 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.NumericRangeFilter;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TermRangeFilter;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.util.BytesRef;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -118,7 +124,6 @@ import com.lucene.utils.FileIndexUtil;
 			IndexSearcher searcher = getSearcher();
 			QueryParser parser = new QueryParser("content", new StandardAnalyzer());
 			Query query = parser.parse(qStr);
-			BooleanQuery
 			TopDocs tds = null;
 			if (null != filter) {
 				tds = searcher.search(query, filter, 50);
@@ -140,6 +145,15 @@ import com.lucene.utils.FileIndexUtil;
 		} catch (IOException e) {
 			 e.printStackTrace();
 		}
+	 }
+	 
+	 @SuppressWarnings("deprecation")
+	@Test
+	 public void testByFilter(){
+		Filter ft = new TermRangeFilter("fileName", new BytesRef("apiError.hi"), new BytesRef("apiError.ps"), true, true);
+		ft = NumericRangeFilter.newIntRange("size", 2, 37, true, true);
+		ft = new QueryWrapperFilter(new WildcardQuery(new Term("fileName", "*.ini")));
+		searchFilter("java", ft);
 	 }
 }
 
