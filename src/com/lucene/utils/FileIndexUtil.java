@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Random;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -47,7 +48,9 @@ import org.apache.lucene.util.BytesRef;
 			}
 			File file = new File(DOC_PATH);
 			Document doc = null;
+			Random random = new Random();
 			for (File f : file.listFiles()) {
+				int score = random.nextInt(600);
 				doc = new Document();
 				doc.add(new TextField("content", new FileReader(f)));
 				
@@ -61,6 +64,9 @@ import org.apache.lucene.util.BytesRef;
 				
 				doc.add(new NumericDocValuesField("sortSize", f.length()));
 				doc.add(new IntField("size", (int)f.length(), Store.YES));
+				
+				doc.add(new NumericDocValuesField("score",score));
+				doc.add(new IntField("score", score, Store.YES));
 				writer.addDocument(doc);
 			}
 		} catch (IOException e) {

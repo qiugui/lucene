@@ -9,7 +9,6 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeFilter;
@@ -26,7 +25,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.lucene.utils.FileIndexUtil;
- public class TestSearch {
+ @SuppressWarnings("deprecation")
+public class TestSearch {
 
 	 private static IndexReader reader = null;
 	 
@@ -73,7 +73,7 @@ import com.lucene.utils.FileIndexUtil;
 				System.out.println(sd.doc + ":(" + 
 						sd.score + ") [" + doc.get("fileName") +
 						"] 【" + doc.get("filePath") +
-						"】Size--->" + doc.get("size")+" 【" + doc.get("date") +
+						"】---Score:" + doc.get("score") + "---Size:" + doc.get("size")+" 【" + doc.get("date") +
 						"】");
 			}
 			
@@ -106,7 +106,8 @@ import com.lucene.utils.FileIndexUtil;
 //		 ts.search("java", new Sort(new SortField("sortFileName", SortField.Type.STRING)));
 //		 ts.search("java", new Sort(new SortField("sortSize", SortField.Type.LONG)));
 //		 ts.search("java", new Sort(new SortField("date", SortField.Type.LONG)));
-		 ts.search("java", new Sort(new SortField("sortSize", SortField.Type.LONG)));
+//		 ts.search("java", new Sort(new SortField("sortSize", SortField.Type.LONG)));
+		 ts.search("java", new Sort(new SortField("score", SortField.Type.INT)));
 	 }
 	 
 	 @Before
@@ -147,11 +148,11 @@ import com.lucene.utils.FileIndexUtil;
 		}
 	 }
 	 
-	 @SuppressWarnings("deprecation")
 	@Test
 	 public void testByFilter(){
-		Filter ft = new TermRangeFilter("fileName", new BytesRef("apiError.hi"), new BytesRef("apiError.ps"), true, true);
-		ft = NumericRangeFilter.newIntRange("size", 2, 37, true, true);
+		Filter ft = null;
+		ft = new TermRangeFilter("fileName", new BytesRef("apiError.hi"), new BytesRef("apiError.ps"), true, true);
+		ft = NumericRangeFilter.newIntRange("size", 1, 3700, true, true);
 		ft = new QueryWrapperFilter(new WildcardQuery(new Term("fileName", "*.ini")));
 		searchFilter("java", ft);
 	 }
