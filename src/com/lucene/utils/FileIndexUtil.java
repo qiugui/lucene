@@ -49,9 +49,14 @@ import org.apache.lucene.util.BytesRef;
 			File file = new File(DOC_PATH);
 			Document doc = null;
 			Random random = new Random();
+			int id = 0;
 			for (File f : file.listFiles()) {
 				int score = random.nextInt(600);
+				id++;
 				doc = new Document();
+				doc.add(new SortedDocValuesField("id", new BytesRef(id)));
+				doc.add(new IntField("id", id, Store.YES));
+				
 				doc.add(new TextField("content", new FileReader(f)));
 				
 				doc.add(new SortedDocValuesField("sortFileName", new BytesRef(f.getName())));
